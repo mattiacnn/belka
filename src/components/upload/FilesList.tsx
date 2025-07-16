@@ -4,15 +4,23 @@ import { memo } from 'react'
 import { FilePreviewCard } from './FilePreviewCard'
 import { IconFiles, IconTrash } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
-import type { FileWithPreview } from '@/hooks/useFileUpload'
+import type { FileWithPreview, FileMetadata } from '@/hooks/useFileUpload'
 
 interface FilesListProps {
   files: FileWithPreview[]
+  filesMetadata: Record<string, FileMetadata>
   onRemoveFile: (fileId: string) => void
+  onMetadataChange: (fileId: string, metadata: Partial<FileMetadata>) => void
   onClearAll?: () => void
 }
 
-export const FilesList = memo(function FilesList({ files, onRemoveFile, onClearAll }: FilesListProps) {
+export const FilesList = memo(function FilesList({ 
+  files, 
+  filesMetadata, 
+  onRemoveFile, 
+  onMetadataChange, 
+  onClearAll 
+}: FilesListProps) {
   if (files.length === 0) {
     return null
   }
@@ -35,35 +43,19 @@ export const FilesList = memo(function FilesList({ files, onRemoveFile, onClearA
       </div>
 
       {/* Files Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {files.map((file) => (
           <FilePreviewCard
             key={file.id}
             file={file}
+            metadata={filesMetadata[file.id]}
             onRemove={onRemoveFile}
+            onMetadataChange={onMetadataChange}
           />
         ))}
       </div>
 
-      {/* Files Summary */}
-      <div className="bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-neutral-600 dark:text-neutral-400">
-            Totale file selezionati:
-          </span>
-          <span className="font-medium text-neutral-700 dark:text-neutral-300">
-            {files.length} file{files.length > 1 ? 's' : ''}
-          </span>
-        </div>
-        <div className="flex items-center justify-between text-sm mt-1">
-          <span className="text-neutral-600 dark:text-neutral-400">
-            Dimensione totale:
-          </span>
-          <span className="font-medium text-neutral-700 dark:text-neutral-300">
-            {(files.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024)).toFixed(2)} MB
-          </span>
-        </div>
-      </div>
+
     </div>
   )
 }) 

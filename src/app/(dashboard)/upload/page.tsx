@@ -6,7 +6,6 @@ import {
   UploadHeader, 
   UploadArea, 
   FilesList, 
-  TagsSection, 
   UploadActions,
   UploadProgress 
 } from '@/components/upload'
@@ -15,14 +14,14 @@ export default function UploadPage() {
   const toast = useToast()
   const {
     files,
-    selectedTags,
+    filesMetadata,
     isUploading,
     uploadedCount,
     currentFileName,
     totalSizeMB,
     addFiles,
     removeFile,
-    setSelectedTags,
+    updateFileMetadata,
     uploadFiles,
     clearAll
   } = useFileUpload()
@@ -48,18 +47,10 @@ export default function UploadPage() {
             <section>
               <FilesList 
                 files={files}
+                filesMetadata={filesMetadata}
                 onRemoveFile={removeFile}
+                onMetadataChange={updateFileMetadata}
                 onClearAll={clearAll}
-              />
-            </section>
-          )}
-
-          {/* Tags Selection */}
-          {files.length > 0 && (
-            <section>
-              <TagsSection 
-                selectedTags={selectedTags}
-                onTagsChange={setSelectedTags}
               />
             </section>
           )}
@@ -82,12 +73,14 @@ export default function UploadPage() {
       </div>
 
       {/* Upload Progress Modal */}
-      <UploadProgress
-        isUploading={isUploading}
-        filesCount={files.length}
-        uploadedCount={uploadedCount}
-        currentFileName={currentFileName}
-      />
+      {isUploading && (
+        <UploadProgress
+          isUploading={isUploading}
+          filesCount={files.length}
+          uploadedCount={uploadedCount}
+          currentFileName={currentFileName}
+        />
+      )}
     </>
   )
 } 

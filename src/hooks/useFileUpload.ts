@@ -28,32 +28,38 @@ const TagSchema = z.object({
     .regex(/^#[a-zA-Z0-9_]+$/, "Tag must start with # and contain only letters, numbers, and underscores")
 })
 
+// Individual file metadata schema
+const FileMetadataSchema = z.object({
+  title: z.string().min(1, "Title is required").max(30, "Title must be less than 30 characters"),
+  description: z.string().max(100, "Description must be less than 100 characters").optional(),
+  tags: z.array(TagSchema).max(10, "Maximum 10 tags allowed").optional()
+})
+
 const UploadFormSchema = z.object({
   files: z.array(FileSchema)
     .min(1, "At least one file is required")
     .max(20, "Maximum 20 files allowed"),
-  tags: z.array(TagSchema)
-    .max(10, "Maximum 10 tags allowed")
-    .optional()
+  filesMetadata: z.record(z.string(), FileMetadataSchema) // fileId -> metadata mapping
 })
 
 export type Tag = z.infer<typeof TagSchema>
+export type FileMetadata = z.infer<typeof FileMetadataSchema>
 
 export interface FileWithPreview extends File {
   id: string
   preview: string
 }
 
-interface UseFileUploadReturn {
+export interface UseFileUploadReturn {
   files: FileWithPreview[]
-  selectedTags: Tag[]
+  filesMetadata: Record<string, FileMetadata>
   isUploading: boolean
   uploadedCount: number
   currentFileName: string
   totalSizeMB: string
-  addFiles: (newFiles: File[]) => void
+  addFiles: (files: File[]) => void
   removeFile: (fileId: string) => void
-  setSelectedTags: (tags: Tag[]) => void
+  updateFileMetadata: (fileId: string, metadata: Partial<FileMetadata>) => void
   uploadFiles: () => Promise<void>
   clearAll: () => void
 }
@@ -63,7 +69,7 @@ export function useFileUpload(): UseFileUploadReturn {
   const toast = useToast()
   
   const [files, setFiles] = useState<FileWithPreview[]>([])
-  const [selectedTags, setSelectedTags] = useState<Tag[]>([])
+  const [filesMetadata, setFilesMetadata] = useState<Record<string, FileMetadata>>({})
   const [isUploading, setIsUploading] = useState(false)
   const [uploadedCount, setUploadedCount] = useState(0)
   const [currentFileName, setCurrentFileName] = useState('')
@@ -116,43 +122,75 @@ export function useFileUpload(): UseFileUploadReturn {
         return
       }
 
-      // Add valid files
-      if (validFiles.length > 0) {
-        setFiles(prev => [...prev, ...validFiles])
-        toast.success(`${validFiles.length} file aggiunt${validFiles.length > 1 ? 'i' : 'o'} con successo`)
+      // Show errors if any
+      if (errors.length > 0) {
+        errors.forEach(error => toast.error(error))
       }
 
-      // Show errors for invalid files
-      errors.forEach(error => {
-        toast.error(error)
-      })
+      // Add valid files and initialize their metadata
+      if (validFiles.length > 0) {
+        setFiles(prevFiles => [...prevFiles, ...validFiles])
+        
+        // Initialize metadata for each new file
+        const newMetadata: Record<string, FileMetadata> = {}
+        validFiles.forEach(file => {
+          newMetadata[file.id] = {
+            title: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension for default title
+            description: "",
+            tags: []
+          }
+        })
+        
+        setFilesMetadata(prevMetadata => ({
+          ...prevMetadata,
+          ...newMetadata
+        }))
+
+        toast.success(`${validFiles.length} file${validFiles.length > 1 ? 's' : ''} aggiunto${validFiles.length > 1 ? 'i' : ''} con successo`)
+      }
 
     } catch (error) {
-      console.error('Error processing files:', error)
-      toast.error("Errore nell'elaborazione dei file. Riprova.")
+      console.error('Error adding files:', error)
+      toast.error("Errore durante l'aggiunta dei file")
     }
   }, [files, createFilePreview, toast])
 
   const removeFile = useCallback((fileId: string) => {
-    setFiles(prev => {
-      const fileToRemove = prev.find(f => f.id === fileId)
-      if (fileToRemove?.preview) {
+    setFiles(prevFiles => {
+      const fileToRemove = prevFiles.find(f => f.id === fileId)
+      if (fileToRemove) {
         URL.revokeObjectURL(fileToRemove.preview)
       }
-      return prev.filter(f => f.id !== fileId)
+      return prevFiles.filter(f => f.id !== fileId)
     })
-    toast.info("File rimosso")
-  }, [toast])
+    
+    // Remove metadata for this file
+    setFilesMetadata(prevMetadata => {
+      const newMetadata = { ...prevMetadata }
+      delete newMetadata[fileId]
+      return newMetadata
+    })
+  }, [])
+
+  const updateFileMetadata = useCallback((fileId: string, metadata: Partial<FileMetadata>) => {
+    setFilesMetadata(prevMetadata => ({
+      ...prevMetadata,
+      [fileId]: {
+        ...prevMetadata[fileId],
+        ...metadata
+      }
+    }))
+  }, [])
 
   const clearAll = useCallback(() => {
-    // Clean up preview URLs
+    // Clean up object URLs
     files.forEach(file => {
-      if (file.preview) {
-        URL.revokeObjectURL(file.preview)
-      }
+      URL.revokeObjectURL(file.preview)
     })
+    
     setFiles([])
-    setSelectedTags([])
+    setFilesMetadata({})
+    setIsUploading(false)
     setUploadedCount(0)
     setCurrentFileName('')
   }, [files])
@@ -171,7 +209,7 @@ export function useFileUpload(): UseFileUploadReturn {
           size: file.size,
           type: file.type
         })),
-        tags: selectedTags
+        filesMetadata
       }
 
       const validation = UploadFormSchema.safeParse(formData)
@@ -197,6 +235,7 @@ export function useFileUpload(): UseFileUploadReturn {
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
+        const metadata = filesMetadata[file.id]
         setCurrentFileName(file.name)
         
         try {
@@ -211,9 +250,9 @@ export function useFileUpload(): UseFileUploadReturn {
           // Prepare form data for API call
           const formData = new FormData()
           formData.append('file', file)
-          formData.append('title', file.name.replace(/\.[^/.]+$/, "")) // Remove file extension for title
-          formData.append('description', '') // Empty description for now
-          formData.append('tags', JSON.stringify(selectedTags.map(tag => tag.label)))
+          formData.append('title', metadata.title)
+          formData.append('description', metadata.description || '')
+          formData.append('tags', JSON.stringify(metadata.tags?.map(tag => tag.label) || []))
           
           // Add image dimensions
           if (imageDimensions.width > 0) {
@@ -275,7 +314,7 @@ export function useFileUpload(): UseFileUploadReturn {
       setIsUploading(false)
       setCurrentFileName('')
     }
-  }, [files, selectedTags, toast, router, clearAll])
+  }, [files, filesMetadata, toast, router, clearAll])
 
   // Calculate total size
   const totalSize = files.reduce((acc, file) => acc + file.size, 0)
@@ -283,14 +322,14 @@ export function useFileUpload(): UseFileUploadReturn {
 
   return {
     files,
-    selectedTags,
+    filesMetadata,
     isUploading,
     uploadedCount,
     currentFileName,
     totalSizeMB,
     addFiles,
     removeFile,
-    setSelectedTags,
+    updateFileMetadata,
     uploadFiles,
     clearAll
   }
