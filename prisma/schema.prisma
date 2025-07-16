@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Travel images table
+model Image {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String
+  description String?
+  image_path  String   @map("image_path")
+  tags        String[] @default([])
+  metadata    Json?
+  created_at  DateTime @default(now()) @map("created_at")
+  updated_at  DateTime @updatedAt @map("updated_at")
+  user_id     String   @map("user_id") @db.Uuid
+
+  @@map("images")
+}
+
+// Tags table for autocomplete
+model Tag {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String
+  created_at DateTime @default(now()) @map("created_at")
+  user_id    String   @map("user_id") @db.Uuid
+
+  // Ensure unique tag names per user
+  @@unique([name, user_id])
+  @@map("tags")
+} 

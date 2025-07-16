@@ -1,0 +1,59 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist
+build
+.next/
+out/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs
+*.log
+
+# Cache directories
+.npm
+.yarn/cache
+.eslintcache
+.swc/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo+
+readme.md
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Upload directories
+public/images
+public/uploads
+public/uploads/*
+
+# Temporary files
+*.tmp
+*.temp
