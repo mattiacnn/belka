@@ -9,6 +9,26 @@ export interface AuthResponse {
   error?: AuthError
 }
 
+// Get the correct redirect URL based on environment
+function getRedirectUrl(): string {
+  if (typeof window === 'undefined') {
+    // Server-side, use environment variable or default
+    return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  }
+  
+  // Client-side, use current origin
+  const isProduction = process.env.NODE_ENV === 'production'
+  const isLocalhost = window.location.hostname === 'localhost'
+  
+  if (isProduction && !isLocalhost) {
+    // In production, use the actual domain
+    return window.location.origin
+  }
+  
+  // In development or localhost
+  return 'http://localhost:3000'
+}
+
 // Sign in with email and password
 export async function signInWithPassword(email: string, password: string): Promise<AuthResponse> {
   try {
@@ -105,10 +125,12 @@ export async function signUpWithPassword(email: string, password: string): Promi
 export async function signInWithGoogle(): Promise<AuthResponse> {
   try {
     const supabase = createClient()
+    const redirectUrl = getRedirectUrl()
+    
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+        redirectTo: `${redirectUrl}/auth/callback`
       }
     })
 
@@ -148,8 +170,10 @@ export async function signOut(): Promise<AuthResponse> {
 export async function resetPassword(email: string): Promise<AuthResponse> {
   try {
     const supabase = createClient()
+    const redirectUrl = getRedirectUrl()
+    
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`
+      redirectTo: `${redirectUrl}/auth/reset-password`
     })
 
     if (error) {
