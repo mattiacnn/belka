@@ -162,7 +162,7 @@ export default function DashboardLayout({
                     <Button
                       variant="ghost"
                       onClick={handleLogout}
-                      className="flex items-center gap-3 w-full justify-start group/sidebar py-2 px-2"
+                      className="flex items-center gap-2 w-full justify-start group/sidebar py-2 p-0"
                     >
                       {link.icon}
                       <motion.span

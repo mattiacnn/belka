@@ -35,7 +35,7 @@ export const UploadActions = memo(function UploadActions({
           variant="outline"
           onClick={handleCancel}
           disabled={isUploading}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 cancel-button"
         >
           <IconArrowLeft className="h-4 w-4" />
           Annulla

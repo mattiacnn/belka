@@ -88,7 +88,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                       size="icon"
                       disabled={isLoading}
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute top-1/2 right-3 -translate-y-1/2 h-8 w-8 flex items-center justify-center"
+                      className="absolute top-1/2 right-3 -translate-y-1/2 h-8 w-8 flex items-center justify-center password-visibility-button"
                     >
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </Button>
@@ -139,7 +139,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
               onClick={onGoogleSignIn}
               disabled={isLoading}
               variant="outline"
-              className="animate-element animate-delay-800 w-full flex items-center justify-center gap-3"
+              className="animate-element animate-delay-800 w-full flex items-center justify-center gap-3 google-button"
               size="lg"
             >
               {isLoading ? (

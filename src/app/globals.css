@@ -99,7 +99,37 @@ body {
     -webkit-text-size-adjust: 100%;
     -webkit-overflow-scrolling: touch;
   }
-  
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 262.1 83.3% 57.8%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --context-card-border: hsla(0, 0%, 18%, 1);
+    --ds-gray-700: hsla(0, 0%, 56%, 1);
+    --ds-gray-1000: hsla(0, 0%, 93%, 1);
+    --ds-shadow: rgba(255, 255, 255, 0.145);
+  }
+
   body {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none;
@@ -136,6 +166,61 @@ body {
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     @apply bg-muted-foreground/30;
+  }
+
+  /* Input styles for dark theme */
+  .dark input {
+    color: hsl(var(--foreground));
+  }
+
+  .dark input::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .dark input:focus {
+    color: hsl(var(--foreground));
+  }
+
+  /* Checkbox styles */
+  .custom-checkbox {
+    @apply appearance-none w-4 h-4 border border-border rounded bg-background checked:bg-primary checked:border-primary focus:ring-2 focus:ring-primary/20;
+  }
+
+  .custom-checkbox:checked {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='white' d='m13.854 3.646-10 10-.708-.708 10-10z'/%3e%3cpath fill='white' d='m2.146 6.854 4 4 .708-.708-4-4z'/%3e%3c/svg%3e");
+  }
+
+  /* Google button specific styles */
+  .google-button {
+    @apply bg-white text-gray-900 border border-gray-200 hover:bg-gray-50;
+  }
+  
+  .dark .google-button {
+    @apply bg-white text-gray-900 border border-gray-300 hover:bg-gray-50;
+  }
+
+  /* Cancel button specific styles */
+  .cancel-button {
+    @apply bg-white text-gray-700 border border-gray-300 hover:bg-gray-50;
+  }
+  
+  .dark .cancel-button {
+    @apply bg-white text-gray-900 border border-gray-300 hover:bg-gray-100;
+  }
+
+  /* Password visibility button styles */
+  .password-visibility-button {
+    @apply text-muted-foreground hover:text-foreground transition-colors;
+  }
+  
+  .dark .password-visibility-button {
+    @apply text-neutral-400 hover:text-neutral-200;
+  }
+
+  /* Testimonial card background improvements */
+  .dark .testimonial-card {
+    background: rgba(39, 39, 42, 0.7);
+    border: 1px solid rgba(82, 82, 91, 0.3);
   }
 
   /* Masonry grid styles */
