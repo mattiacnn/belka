@@ -16,17 +16,13 @@ function getRedirectUrl(): string {
     return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   }
   
-  // Client-side, use current origin
-  const isProduction = process.env.NODE_ENV === 'production'
-  const isLocalhost = window.location.hostname === 'localhost'
-  
-  if (isProduction && !isLocalhost) {
-    // In production, use the actual domain
-    return window.location.origin
+  // Client-side, check if we have a site URL configured
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL
   }
   
-  // In development or localhost
-  return 'http://localhost:3000'
+  // Fallback to current origin or localhost
+  return window.location.origin || 'http://localhost:3000'
 }
 
 // Sign in with email and password
