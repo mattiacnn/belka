@@ -24,7 +24,6 @@ const GallerySkeleton = () => (
 
 export default function HomePage() {
   const router = useRouter()
-  const supabase = createClient()
   
   const [images, setImages] = useState<TravelImageWithUrls[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -38,6 +37,8 @@ export default function HomePage() {
       try {
         setIsLoading(true)
         setError(null)
+        
+        const supabase = createClient()
 
         // Check if user is authenticated
         const { data: { user }, error: authError } = await supabase.auth.getUser()

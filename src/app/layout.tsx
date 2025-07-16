@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 
@@ -10,12 +10,6 @@ export const metadata: Metadata = {
   description: 'Carica e visualizza le tue foto di viaggio con informazioni aggiuntive',
   keywords: ['viaggio', 'foto', 'galleria', 'memoria', 'ricordi'],
   authors: [{ name: 'Belka Team' }],
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
   robots: {
     index: true,
     follow: true,
@@ -26,6 +20,13 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'it_IT',
   },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 }
 
 export default function RootLayout({

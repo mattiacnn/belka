@@ -161,7 +161,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
             </Button>
 
             <p className="animate-element animate-delay-900 text-center text-sm text-muted-foreground">
-              Don't have an account? <a href="#" onClick={(e) => { e.preventDefault(); if (!isLoading) onCreateAccount?.(); }} className={`text-violet-400 hover:underline transition-colors ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>Create one</a>
+              Don&apos;t have an account? <a href="#" onClick={(e) => { e.preventDefault(); if (!isLoading) onCreateAccount?.(); }} className={`text-violet-400 hover:underline transition-colors ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>Create one</a>
             </p>
           </div>
         </div>

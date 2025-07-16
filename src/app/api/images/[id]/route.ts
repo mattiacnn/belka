@@ -4,10 +4,11 @@ import { getImageById, updateImage, deleteImage } from '@/lib/database/images'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const image = await getImageById(params.id)
+    const { id } = await params
+    const image = await getImageById(id)
 
     if (!image) {
       return NextResponse.json(
@@ -39,11 +40,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const data = await request.json()
-    const updatedImage = await updateImage(params.id, data)
+    const updatedImage = await updateImage(id, data)
 
     if (!updatedImage) {
       return NextResponse.json(
@@ -75,11 +77,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     // Get image details before deletion
-    const image = await getImageById(params.id)
+    const image = await getImageById(id)
     
     if (!image) {
       return NextResponse.json(
@@ -89,7 +92,7 @@ export async function DELETE(
     }
     
     // Delete from database
-    await deleteImage(params.id)
+    await deleteImage(id)
 
     // Delete from storage
     const supabase = await createClient()

@@ -3,11 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { SignInPage } from '@/components/ui/sign-in'
-import type { Testimonial } from '@/components/ui/testimonial-card'
 import { signInWithPassword, signInWithGoogle, resetPassword } from '@/lib/auth'
-import { signInSchema, resetPasswordSchema, type SignInFormData } from '@/lib/validations/auth'
+import { signInSchema, resetPasswordSchema } from '@/lib/validations/auth'
 import { Button } from '@/components/ui/button'
-import type { ZodError } from 'zod'
 
 export default function LoginPage() {
   const router = useRouter()

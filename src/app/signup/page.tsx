@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { SignUpPage } from '@/components/ui/sign-up'
 import { signUpWithPassword, signInWithGoogle } from '@/lib/auth'
-import { signUpSchema, type SignUpFormData } from '@/lib/validations/auth'
+import { signUpSchema } from '@/lib/validations/auth'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -82,7 +82,7 @@ export default function SignupPage() {
           </div>
           <h2 className="text-2xl font-bold text-foreground mb-2">Account creato con successo!</h2>
           <p className="text-muted-foreground mb-6">
-            Ti abbiamo inviato un'email di conferma. Controlla la tua casella di posta e clicca sul link per attivare il tuo account.
+            Ti abbiamo inviato un&apos;email di conferma. Controlla la tua casella di posta e clicca sul link per attivare il tuo account.
           </p>
           <p className="text-sm text-muted-foreground/70">
             Verrai reindirizzato alla pagina di login tra poco...
