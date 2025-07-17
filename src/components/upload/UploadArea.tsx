@@ -44,4 +44,6 @@ export const UploadArea = memo(forwardRef<UploadAreaRef, UploadAreaProps>(
       </div>
     )
   }
-)) 
+))
+
+UploadArea.displayName = "UploadArea" 

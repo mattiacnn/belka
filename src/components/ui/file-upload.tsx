@@ -187,6 +187,8 @@ export const FileUpload = forwardRef<FileUploadRef, {
   );
 });
 
+FileUpload.displayName = "FileUpload"
+
 export function GridPattern() {
   const columns = 41;
   const rows = 11;
