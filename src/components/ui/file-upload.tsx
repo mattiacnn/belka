@@ -1,5 +1,5 @@
 import { cn } from "@/utils/index";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, forwardRef, useImperativeHandle } from "react";
 import { motion } from "framer-motion";
 import { IconUpload } from "@tabler/icons-react";
 import { useDropzone } from "react-dropzone";
@@ -25,13 +25,26 @@ const secondaryVariant = {
   },
 };
 
-export const FileUpload = ({
-  onChange,
-}: {
+export interface FileUploadRef {
+  reset: () => void;
+}
+
+export const FileUpload = forwardRef<FileUploadRef, {
   onChange?: (files: File[]) => void;
-}) => {
+}>(({ onChange }, ref) => {
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const resetFileInput = () => {
+    setFiles([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  useImperativeHandle(ref, () => ({
+    reset: resetFileInput
+  }));
 
   const handleFileChange = (newFiles: File[]) => {
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
@@ -172,7 +185,7 @@ export const FileUpload = ({
       </motion.div>
     </div>
   );
-};
+});
 
 export function GridPattern() {
   const columns = 41;

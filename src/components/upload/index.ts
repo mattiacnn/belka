@@ -1,5 +1,5 @@
 export { UploadHeader } from './UploadHeader'
-export { UploadArea } from './UploadArea'
+export { UploadArea, type UploadAreaRef } from './UploadArea'
 export { FilesList } from './FilesList'
 export { FilePreviewCard } from './FilePreviewCard'
 export { TagsSection } from './TagsSection'

@@ -9,16 +9,20 @@ import type { FileWithPreview, FileMetadata } from '@/hooks/useFileUpload'
 interface FilesListProps {
   files: FileWithPreview[]
   filesMetadata: Record<string, FileMetadata>
+  fileErrors: Record<string, string[]>
   onRemoveFile: (fileId: string) => void
   onMetadataChange: (fileId: string, metadata: Partial<FileMetadata>) => void
+  onClearErrors?: (fileId: string) => void
   onClearAll?: () => void
 }
 
 export const FilesList = memo(function FilesList({ 
   files, 
   filesMetadata, 
+  fileErrors,
   onRemoveFile, 
-  onMetadataChange, 
+  onMetadataChange,
+  onClearErrors,
   onClearAll 
 }: FilesListProps) {
   if (files.length === 0) {
@@ -49,8 +53,10 @@ export const FilesList = memo(function FilesList({
             key={file.id}
             file={file}
             metadata={filesMetadata[file.id]}
+            errors={fileErrors[file.id]}
             onRemove={onRemoveFile}
             onMetadataChange={onMetadataChange}
+            onClearErrors={onClearErrors}
           />
         ))}
       </div>

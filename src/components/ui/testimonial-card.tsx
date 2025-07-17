@@ -19,7 +19,6 @@ export const TestimonialCard = ({ testimonial, delay = '' }: TestimonialCardProp
     />
     <div className="text-sm leading-snug">
       <p className="flex items-center gap-1 font-medium text-card-foreground">{testimonial.name}</p>
-      <p className="text-muted-foreground">{testimonial.handle}</p>
       <p className="mt-1 text-card-foreground/90">{testimonial.text}</p>
     </div>
   </div>

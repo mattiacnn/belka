@@ -1,10 +1,12 @@
 'use client'
 
+import { useRef, useEffect } from 'react'
 import { Toaster, useToast } from '@/components/ui/toast'
 import { useFileUpload } from '@/hooks/useFileUpload'
 import { 
   UploadHeader, 
   UploadArea, 
+  type UploadAreaRef,
   FilesList, 
   UploadActions,
   UploadProgress 
@@ -12,9 +14,12 @@ import {
 
 export default function UploadPage() {
   const toast = useToast()
+  const uploadAreaRef = useRef<UploadAreaRef>(null)
+  
   const {
     files,
     filesMetadata,
+    fileErrors,
     isUploading,
     uploadedCount,
     currentFileName,
@@ -22,9 +27,18 @@ export default function UploadPage() {
     addFiles,
     removeFile,
     updateFileMetadata,
+    clearFileErrors,
     uploadFiles,
-    clearAll
+    clearAll,
+    registerResetCallback
   } = useFileUpload()
+
+  // Register the reset callback when component mounts
+  useEffect(() => {
+    registerResetCallback(() => {
+      uploadAreaRef.current?.reset()
+    })
+  }, [registerResetCallback])
 
   return (
     <>
@@ -39,7 +53,7 @@ export default function UploadPage() {
         <div className="space-y-8">
           {/* File Upload Area */}
           <section>
-            <UploadArea onFilesAdded={addFiles} />
+            <UploadArea onFilesAdded={addFiles} ref={uploadAreaRef} />
           </section>
 
           {/* Selected Files */}
@@ -48,8 +62,10 @@ export default function UploadPage() {
               <FilesList 
                 files={files}
                 filesMetadata={filesMetadata}
+                fileErrors={fileErrors}
                 onRemoveFile={removeFile}
                 onMetadataChange={updateFileMetadata}
+                onClearErrors={clearFileErrors}
                 onClearAll={clearAll}
               />
             </section>

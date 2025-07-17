@@ -30,7 +30,7 @@ const TagSchema = z.object({
 
 // Individual file metadata schema
 const FileMetadataSchema = z.object({
-  title: z.string().min(1, "Title is required").max(30, "Title must be less than 30 characters"),
+  title: z.string().min(1, "Title is required").max(50, "Title must be less than 30 characters"),
   description: z.string().max(100, "Description must be less than 100 characters").optional(),
   tags: z.array(TagSchema).max(10, "Maximum 10 tags allowed").optional()
 })
@@ -53,6 +53,7 @@ export interface FileWithPreview extends File {
 export interface UseFileUploadReturn {
   files: FileWithPreview[]
   filesMetadata: Record<string, FileMetadata>
+  fileErrors: Record<string, string[]> // fileId -> array of error messages
   isUploading: boolean
   uploadedCount: number
   currentFileName: string
@@ -60,8 +61,10 @@ export interface UseFileUploadReturn {
   addFiles: (files: File[]) => void
   removeFile: (fileId: string) => void
   updateFileMetadata: (fileId: string, metadata: Partial<FileMetadata>) => void
+  clearFileErrors: (fileId: string) => void
   uploadFiles: () => Promise<void>
   clearAll: () => void
+  registerResetCallback: (callback: () => void) => void
 }
 
 export function useFileUpload(): UseFileUploadReturn {
@@ -70,15 +73,21 @@ export function useFileUpload(): UseFileUploadReturn {
   
   const [files, setFiles] = useState<FileWithPreview[]>([])
   const [filesMetadata, setFilesMetadata] = useState<Record<string, FileMetadata>>({})
+  const [fileErrors, setFileErrors] = useState<Record<string, string[]>>({})
   const [isUploading, setIsUploading] = useState(false)
   const [uploadedCount, setUploadedCount] = useState(0)
   const [currentFileName, setCurrentFileName] = useState('')
+  const [resetUploadAreaCallback, setResetUploadAreaCallback] = useState<(() => void) | null>(null)
 
   const createFilePreview = useCallback((file: File): FileWithPreview => {
     const id = Math.random().toString(36).substr(2, 9)
     const preview = URL.createObjectURL(file)
     
     return Object.assign(file, { id, preview })
+  }, [])
+
+  const registerResetCallback = useCallback((callback: () => void) => {
+    setResetUploadAreaCallback(() => callback)
   }, [])
 
   const addFiles = useCallback((uploadedFiles: File[]) => {
@@ -182,6 +191,14 @@ export function useFileUpload(): UseFileUploadReturn {
     }))
   }, [])
 
+  const clearFileErrors = useCallback((fileId: string) => {
+    setFileErrors(prevErrors => {
+      const newErrors = { ...prevErrors }
+      delete newErrors[fileId]
+      return newErrors
+    })
+  }, [])
+
   const clearAll = useCallback(() => {
     // Clean up object URLs
     files.forEach(file => {
@@ -190,10 +207,16 @@ export function useFileUpload(): UseFileUploadReturn {
     
     setFiles([])
     setFilesMetadata({})
+    setFileErrors({})
     setIsUploading(false)
     setUploadedCount(0)
     setCurrentFileName('')
-  }, [files])
+    
+    // Reset the upload area file input
+    if (resetUploadAreaCallback) {
+      resetUploadAreaCallback()
+    }
+  }, [files, resetUploadAreaCallback])
 
   const uploadFiles = useCallback(async () => {
     if (files.length === 0) {
@@ -214,12 +237,38 @@ export function useFileUpload(): UseFileUploadReturn {
 
       const validation = UploadFormSchema.safeParse(formData)
       if (!validation.success) {
+        // Clear previous errors
+        setFileErrors({})
+        
+        // Group errors by file ID
+        const errorsByFile: Record<string, string[]> = {}
+        
         validation.error.issues.forEach((error) => {
-          const path = error.path.join('.')
-          toast.error(`${path}: ${error.message}`)
+          if (error.path.length >= 2 && error.path[0] === 'filesMetadata') {
+            const fileId = error.path[1] as string
+            
+            if (!errorsByFile[fileId]) {
+              errorsByFile[fileId] = []
+            }
+            
+            errorsByFile[fileId].push(error.message)
+          } else {
+            // Generic error not related to specific file
+            toast.error(error.message)
+          }
         })
+        
+        // Set file-specific errors
+        if (Object.keys(errorsByFile).length > 0) {
+          setFileErrors(errorsByFile)
+          toast.error("Correggi gli errori evidenziati prima di caricare")
+        }
+        
         return
       }
+      
+      // Clear any existing errors if validation passes
+      setFileErrors({})
     } catch (error) {
       console.error('Validation error:', error)
       toast.error("Validazione fallita. Controlla i tuoi dati.")
@@ -323,6 +372,7 @@ export function useFileUpload(): UseFileUploadReturn {
   return {
     files,
     filesMetadata,
+    fileErrors,
     isUploading,
     uploadedCount,
     currentFileName,
@@ -330,7 +380,9 @@ export function useFileUpload(): UseFileUploadReturn {
     addFiles,
     removeFile,
     updateFileMetadata,
+    clearFileErrors,
     uploadFiles,
-    clearAll
+    clearAll,
+    registerResetCallback
   }
 } 
